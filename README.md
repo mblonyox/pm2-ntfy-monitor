@@ -1,12 +1,17 @@
 # pm2-ntfy-monitor
 A pm2 module for sending logs and more to an ntfy endpoint.
-> :warning: Currently in first development; not ment to be used yet.
+> :warning: Only testet by personal usage yet. Project itself not jet maintained. 
 
 
 ## Usage
 
 You should install this module first.
 
+```sh
+
+pm2 install Himmelxd/pm2-ntfy-monitor
+
+```
 
 To get this module work, you need to tell it your ntfy url and topic:
 
@@ -56,7 +61,7 @@ pm2 set pm2-ntfy-monitor:<key> <value>
 
 ## Message merge and postpone sending
 
-When our application is executed in cluster mode, there will be many processes. And if we restart the application, every process will trigger a `restart` event and all the events will be notified to us. I think this is unnecessary and use a message queue to avoid this behaviour.
+When our application is executed in cluster mode, there will be many processes. And if we restart the application, every process will trigger a `restart` event and all the events will be notified to us. I think this is unnecessary and use a message queue to avoid this behavior.
 
 The message queue receives messages and merges the same event. Then it uses a scheduler to finish the notify task.
 
