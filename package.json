@@ -1,0 +1,39 @@
+{
+  "name": "pm2-ntfy-monitor",
+  "version": "0.0.1",
+  "description": "A pm2 monitor which sends log messages to ntfy.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "PM2",
+    "monitor",
+    "webhook"
+  ],
+  "author": "ZhangPuXi,himmelxd",
+  "license": "ISC",
+  "dependencies": {
+    "bent": "^7.3.12",
+    "pm2": "^4.5.4",
+    "pmx": "^1.6.7"
+  },
+  "config": {
+    "webhookUrl": null,
+    "ntfyTopic": null,
+    "log": false,
+    "error": true,
+    "kill": true,
+    "exception": true,
+    "restart": true,
+    "reload": true,
+    "delete": true,
+    "stop": true,
+    "restart overlimit": true,
+    "exit": false,
+    "start": false,
+    "online": false,
+    "bufferMaxSecond" : 5,
+    "buffer" : true
+  }
+}
