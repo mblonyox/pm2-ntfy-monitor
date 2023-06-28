@@ -77,4 +77,4 @@ And the `bufferMaxSecond` specifies how long should the monitor program buffer t
 
 ## Acknowledgements
 
-- [pm2-webhook-monitor](https://github.com/ZhangPuXi/Pm2WebhookMonitor) : This project inspired me to create this module, thanks to every one contributes to this project, thanks for their hard-working and open source spirit.
+- [pm2-webhook-monitor](https://github.com/ZhangPuXi/Pm2WebhookMonitor) : This project is mainly based on this. Only the notifier.js was really customized.
