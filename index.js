@@ -3,7 +3,7 @@ const pmx          = require( 'pmx'                );
 const MessageQueue = require( './message-queue.js' );
 
 const moduleConfig    = pmx.initModule();
-const moduleName      = 'pm2-webhook-monitor';
+const moduleName      = 'pm2-ntfy-monitor';
 const messageQueueMap = {};
 
 function parseProcessName( process ) {
