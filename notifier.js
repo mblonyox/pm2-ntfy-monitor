@@ -1,5 +1,5 @@
 const { fetch } = require('undici');
-const stripAnsi = require("strip-ansi")
+const { stripAnsi } = require('./strip-ansi.js')
 
 class Notifier {
   moduleConfig = null
@@ -9,6 +9,7 @@ class Notifier {
   }
 
   notify(message) {
+
     const moduleConfig = this.moduleConfig;
 
     const notifyUrl = moduleConfig.webhookUrl;
