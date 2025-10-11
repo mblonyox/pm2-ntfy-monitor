@@ -1,5 +1,5 @@
 const { fetch } = require('undici');
-
+const stripAnsi = require("strip-ansi")
 
 class Notifier {
   moduleConfig = null
@@ -15,7 +15,7 @@ class Notifier {
 
     const params = {
       topic: moduleConfig.ntfyTopic ?? `pm2-${message.name}`,
-      message: `${message.description}\n${message.timestamp ? new Date(message.timestamp).toLocaleString() : ''}`,
+      message: `${stripAnsi(message.description)}\n${message.timestamp ? new Date(message.timestamp).toLocaleString() : ''}`,
       title: `${message.name}: ${message.event}`,
       priority: 3,
       tags: [message.event],
