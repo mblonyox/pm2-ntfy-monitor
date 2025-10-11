@@ -15,8 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "bent": "^7.3.12",
-    "pm2": "^4.5.4",
-    "pmx": "^1.6.7"
+    "pm2": "^6.0.13",
+    "pmx": "^1.6.8"
   },
   "config": {
     "webhookUrl": null,
@@ -33,7 +33,7 @@
     "exit": false,
     "start": false,
     "online": false,
-    "bufferMaxSecond" : 5,
-    "buffer" : true
+    "bufferMaxSecond": 5,
+    "buffer": true
   }
 }
