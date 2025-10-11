@@ -8,7 +8,7 @@ const csi = '[\\u001B\\u009B][[\\]()#;?]*(?:\\d{1,4}(?:[;:]\\d{0,4})*)?[\\dA-PR-
 
 const pattern = `${osc}|${csi}`;
 
-const ansiRegex = new RegExp(pattern, onlyFirst ? undefined : 'g');
+const ansiRegex = new RegExp(pattern, 'g');
 
 function stripAnsi(s) {
   return s.replace(ansiRegex, "")
