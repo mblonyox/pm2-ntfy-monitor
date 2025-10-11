@@ -1,5 +1,4 @@
-const bent = require('bent');
-const os = require('os');
+const { fetch } = require('undici');
 
 
 class Notifier {
@@ -13,20 +12,21 @@ class Notifier {
     const moduleConfig = this.moduleConfig;
 
     const notifyUrl = moduleConfig.webhookUrl;
-    const poster = bent(notifyUrl, 'POST', {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    });
-
 
     const params = {
-      topic: moduleConfig.ntfyTopic??`pm2-${message.name}`,
+      topic: moduleConfig.ntfyTopic ?? `pm2-${message.name}`,
       message: `${message.description}\n${message.timestamp ? new Date(message.timestamp).toLocaleString() : ''}`,
       title: `${message.name}: ${message.event}`,
       priority: 3,
       tags: [message.event],
     };
 
-    poster('', JSON.stringify(params))
+    fetch(notifyUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params)
+    })
+
   }
 
   notifyAll(messageList) {

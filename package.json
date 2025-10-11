@@ -14,9 +14,9 @@
   "author": "ZhangPuXi,himmelxd",
   "license": "ISC",
   "dependencies": {
-    "bent": "^7.3.12",
     "pm2": "^6.0.13",
-    "pmx": "^1.6.8"
+    "pmx": "^1.6.8",
+    "undici": "^7.16.0"
   },
   "config": {
     "webhookUrl": null,
