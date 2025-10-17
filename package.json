@@ -21,6 +21,7 @@
   "config": {
     "webhookUrl": null,
     "ntfyTopic": null,
+    "ignore": null,
     "log": false,
     "error": true,
     "kill": true,

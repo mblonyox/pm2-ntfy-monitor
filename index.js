@@ -1,153 +1,161 @@
-const pm2          = require( 'pm2'                );
-const pmx          = require( 'pmx'                );
-const MessageQueue = require( './message-queue.js' );
+const pm2 = require('pm2');
+const pmx = require('pmx');
+const MessageQueue = require('./message-queue.js');
 
-const moduleConfig    = pmx.initModule();
-const moduleName      = 'pm2-ntfy-monitor';
+const moduleConfig = pmx.initModule();
+const moduleName = 'pm2-ntfy-monitor';
 const messageQueueMap = {};
 
-function parseProcessName( process ) {
+function isIgnored(name) {
+  if (!moduleConfig.ignore) return false;
+
+  const re = new RegExp(moduleConfig.ignore);
+
+  return re.test(name)
+}
+
+function parseProcessName(process) {
   let result;
 
   result = process.name;
 
-  if ( process.exec_mode === 'cluster_mode' ) {
-    result += `[${ process.pm_id }]`;
+  if (process.exec_mode === 'cluster_mode') {
+    result += `[${process.pm_id}]`;
   }
 
   return result;
 }
 
-function processLogMessage( message ) {
+function processLogMessage(message) {
   let result;
 
-  if ( typeof message === 'string' ) {
+  if (typeof message === 'string') {
     result = message;
   } else {
     result = '';
   }
 
-  if ( result.length > 100 ) {
-    result = result.slice( 0, 100 );
+  if (result.length > 100) {
+    result = result.slice(0, 100);
   }
 
   return result;
 }
 
-function getMessageQueueSingleton( processName ) {
-  if ( !messageQueueMap[ processName ] ) {
-    messageQueueMap[ processName ] = new MessageQueue( moduleConfig );
+function getMessageQueueSingleton(processName) {
+  if (!messageQueueMap[processName]) {
+    messageQueueMap[processName] = new MessageQueue(moduleConfig);
   }
 
-  return messageQueueMap[ processName ];
+  return messageQueueMap[processName];
 }
 
-function listenLog( bus ) {
-  bus.on( 'log:out', function ( data ) {
-    const messageQueue = getMessageQueueSingleton( data.process.name );
+function listenLog(bus) {
+  bus.on('log:out', function (data) {
+    const messageQueue = getMessageQueueSingleton(data.process.name);
 
-    if ( data.process.name !== moduleName ) {
-      messageQueue.addMessage( {
-        name        : parseProcessName( data.process ),
-        event       : 'log',
-        description : processLogMessage( data.data )
-      } );
+    if (data.process.name !== moduleName && !isIgnored(data.process.name)) {
+      messageQueue.addMessage({
+        name: parseProcessName(data.process),
+        event: 'log',
+        description: processLogMessage(data.data)
+      });
     }
-  } );
+  });
 }
 
-function listenError( bus ) {
-  bus.on( 'log:err', function ( data ) {
-    const messageQueue = getMessageQueueSingleton( data.process.name );
+function listenError(bus) {
+  bus.on('log:err', function (data) {
+    const messageQueue = getMessageQueueSingleton(data.process.name);
 
-    if ( data.process.name !== moduleName ) {
-      messageQueue.addMessage( {
-        name        : parseProcessName( data.process ),
-        event       : 'error',
-        description : processLogMessage( data.data )
-      } );
+    if (data.process.name !== moduleName && !isIgnored(data.process.name)) {
+      messageQueue.addMessage({
+        name: parseProcessName(data.process),
+        event: 'error',
+        description: processLogMessage(data.data)
+      });
     }
-  } );
+  });
 }
 
-function listenKill( bus ) {
-  bus.on( 'pm2:kill', function ( data ) {
-    const messageQueue = getMessageQueueSingleton( 'PM2' );
+function listenKill(bus) {
+  bus.on('pm2:kill', function (data) {
+    const messageQueue = getMessageQueueSingleton('PM2');
 
-    messageQueue.addMessage( {
-      name        : 'PM2',
-      event       : 'kill',
-      description : processLogMessage( data.msg ),
-      timestamp   : ( new Date() ).getTime()
-    } );
-  } );
+    messageQueue.addMessage({
+      name: 'PM2',
+      event: 'kill',
+      description: processLogMessage(data.msg),
+      timestamp: (new Date()).getTime()
+    });
+  });
 }
 
-function listenException( bus ) {
-  bus.on( 'process:exception', function ( data ) {
-    const messageQueue = getMessageQueueSingleton( data.process.name );
+function listenException(bus) {
+  bus.on('process:exception', function (data) {
+    const messageQueue = getMessageQueueSingleton(data.process.name);
 
-    if ( data.process.name !== moduleName ) {
+    if (data.process.name !== moduleName && !isIgnored(data.process.name)) {
       let message;
 
-      if ( data.data ) {
-        if ( data.data.message ) {
+      if (data.data) {
+        if (data.data.message) {
           message = data.data.message;
         } else {
           try {
-            message = JSON.stringify( data.data );
-          } catch ( exception ) {
-            message = Object.prototype.toString.call( data.data );
+            message = JSON.stringify(data.data);
+          } catch (exception) {
+            message = Object.prototype.toString.call(data.data);
           }
         }
       }
 
-      message = processLogMessage( message );
+      message = processLogMessage(message);
 
-      messageQueue.addMessage( {
-        name        : parseProcessName( data.process ),
-        event       : 'exception',
-        description : message,
-        timestamp   : ( new Date() ).getTime()
-      } );
+      messageQueue.addMessage({
+        name: parseProcessName(data.process),
+        event: 'exception',
+        description: message,
+        timestamp: (new Date()).getTime()
+      });
     }
-  } );
+  });
 }
 
-function listenProcessEvent( bus ) {
-  bus.on( 'process:event', function ( data ) {
+function listenProcessEvent(bus) {
+  bus.on('process:event', function (data) {
 
-    const messageQueue = getMessageQueueSingleton( data.process.name );
+    const messageQueue = getMessageQueueSingleton(data.process.name);
 
-    if ( moduleConfig[ data.event ] && data.process.name !== moduleName ) {
-      messageQueue.addMessage( {
-        name        : parseProcessName( data.process ),
-        event       : data.event,
-        description : `A ${ data.event } event is occurred.`,
-        timestamp   : ( new Date() ).getTime()
-      } );
+    if (moduleConfig[data.event] && data.process.name !== moduleName && !isIgnored(data.process.name)) {
+      messageQueue.addMessage({
+        name: parseProcessName(data.process),
+        event: data.event,
+        description: `A ${data.event} event is occurred.`,
+        timestamp: (new Date()).getTime()
+      });
     }
-  } );
+  });
 }
 
-pm2.launchBus( function ( error, bus ) {
-  if ( !error ) {
-    if ( moduleConfig.log ) {
-      listenLog( bus );
+pm2.launchBus(function (error, bus) {
+  if (!error) {
+    if (moduleConfig.log) {
+      listenLog(bus);
     }
 
-    if ( moduleConfig.error ) {
-      listenError( bus );
+    if (moduleConfig.error) {
+      listenError(bus);
     }
 
-    if ( moduleConfig.kill ) {
-      listenKill( bus );
+    if (moduleConfig.kill) {
+      listenKill(bus);
     }
 
-    if ( moduleConfig.exception ) {
-      listenException( bus );
+    if (moduleConfig.exception) {
+      listenException(bus);
     }
 
-    listenProcessEvent( bus );
+    listenProcessEvent(bus);
   }
-} );
+});
